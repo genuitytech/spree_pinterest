@@ -9,3 +9,4 @@ nbproject
 *.swp
 spec/dummy
 *.gem
+Gemfile.lock
