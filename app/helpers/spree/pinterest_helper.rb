@@ -4,7 +4,7 @@ module Spree
       return if product.images.empty?
 
       url = escape spree.product_url(product)
-      media = escape product.images.first.attachment.url
+      media = escape absolute_image_url(product.images.first.attachment.url)
       description = escape product.name
 
       link_to("Pin It",
@@ -17,6 +17,12 @@ module Spree
 
     def escape(string)
       URI.escape string, /[^#{URI::PATTERN::UNRESERVED}]/
+    end
+
+    def absolute_image_url(url)
+      return url if url.starts_with? "http"
+
+      request.protocol + request.host + url
     end
   end
 end

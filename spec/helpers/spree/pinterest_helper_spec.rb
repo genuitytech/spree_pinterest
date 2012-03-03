@@ -20,14 +20,35 @@ module Spree
         end
 
         describe "href" do
-          let(:expected_output) do
-            image = product.images.first
-            "http://pinterest.com/pin/create/button/?url=#{escape(spree.product_url(product, :host => "test.host"))}&media=#{escape(image.attachment.url)}&description=#{escape(product.name)}"
+          context "when image attachment url is a relative url" do
+            before do
+              product.images.first.stub_chain(:attachment, :url).and_return("/path/to/image.png")
+            end
+
+            let(:expected_output) do
+              image = product.images.first
+              "http://pinterest.com/pin/create/button/?url=#{escape(spree.product_url(product, :host => "test.host"))}&media=#{escape("http://test.host#{image.attachment.url}")}&description=#{escape(product.name)}"
+            end
+
+            subject { Nokogiri::HTML(output).xpath("//a/@href").text }
+
+            it { should == expected_output }
           end
 
-          subject { Nokogiri::HTML(output).xpath("//a/@href").text }
+          context "when image attachment url is an absolute url" do
+            before do
+              product.images.first.stub_chain(:attachment, :url).and_return("http://test.host/path/to/image.png")
+            end
 
-          it { should == expected_output }
+            let(:expected_output) do
+              image = product.images.first
+              "http://pinterest.com/pin/create/button/?url=#{escape(spree.product_url(product, :host => "test.host"))}&media=#{escape("http://test.host#{image.attachment.url}")}&description=#{escape(product.name)}"
+            end
+
+            subject { Nokogiri::HTML(output).xpath("//a/@href").text }
+
+            it { should == expected_output }
+          end
 
           def escape(string)
             URI.escape string, /[^#{URI::PATTERN::UNRESERVED}]/
