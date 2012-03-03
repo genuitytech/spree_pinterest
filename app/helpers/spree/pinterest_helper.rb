@@ -1,9 +1,9 @@
 module Spree
   module PinterestHelper
     def pin_it_button(product)
-      return if product.images.blank?
+      return if product.images.empty?
 
-      url = escape request.url
+      url = escape spree.product_url(product)
       media = escape product.images.first.attachment.url
       description = escape product.name
 
